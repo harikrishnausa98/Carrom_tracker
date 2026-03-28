@@ -1,593 +1,429 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Prevent aggressive caching -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-
-    <title>Innova Carrom Tracker</title>
-    <!-- Modern, sporty font -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=5">
-    <style>
-        .left-dialogue-ticker {
-            position: fixed;
-            left: 2vw;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20vw;
-            max-width: 220px;
-            height: 70vh;
-            overflow: hidden;
-            pointer-events: none; /* Allows clicks to pass through to the background */
-            z-index: 0;
-            /* Creates a smooth fade effect at the top and bottom */
-            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-        }
-        .dialogue-scroll-content {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            animation: scroll-vertical 30s linear infinite; /* Adjust '30s' for reading speed */
-        }
-        .dialogue-item {
-            background: var(--card-bg, #ffffff);
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            font-size: 0.9rem;
-            line-height: 1.4;
-            border-left: 4px solid var(--primary, #007bff);
-        }
-        @keyframes scroll-vertical {
-            0% { transform: translateY(80vh); }
-            100% { transform: translateY(-100%); }
-        }
-        .right-banner {
-            position: fixed;
-            right: 2vw;
-            top: 100px;
-            bottom: 20px;
-            overflow-y: auto;
-            width: 24vw;
-            max-width: 350px;
-            text-align: center;
-            z-index: 0;
-            pointer-events: auto; /* Allow interactions */
-        }
-        .right-banner img {
-            width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-top: 10px;
-        }
-        .right-banner h3 {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 800;
-            font-size: clamp(1rem, 2vw, 1.4rem);
-            margin: 0 0 10px 0;
-            line-height: 1.4;
-        }
-        @media (max-width: 850px) {
-            .left-dialogue-ticker, .right-banner {
-                position: relative;
-                width: 100%;
-                max-width: 600px;
-                transform: none;
-                top: 0;
-                bottom: auto;
-                left: 0;
-                right: 0;
-                margin: 0 auto 20px auto;
-                padding: 0 1rem;
-                pointer-events: auto;
-            }
-            .left-dialogue-ticker {
-                height: 250px;
-            }
-            .dialogue-scroll-content {
-                animation: scroll-vertical-mobile 20s linear infinite;
-            }
-        }
-        @media (min-width: 851px) {
-            main {
-                width: 48vw;
-            }
-        }
-        @keyframes scroll-vertical-mobile {
-            0% { transform: translateY(250px); }
-            100% { transform: translateY(-100%); }
-        }
-
-        /* Static Top Navigation overrides */
-        .sidebar {
-            position: static !important;
-            transform: none !important;
-            width: 100% !important;
-            height: auto !important;
-            background: transparent !important;
-            box-shadow: none !important;
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: center !important;
-            gap: 10px !important;
-            padding: 0 0 20px 0 !important;
-            flex-wrap: wrap !important;
-        }
-        .sidebar-header {
-            display: none !important;
-        }
-        .sidebar .tab-btn {
-            background: var(--card-bg, #ffffff) !important;
-            border: 2px solid transparent !important;
-            color: var(--text-color, #333) !important;
-            padding: 10px 20px !important;
-            border-radius: 8px !important;
-            font-family: 'Outfit', sans-serif !important;
-            font-weight: 600 !important;
-            font-size: 1rem !important;
-            cursor: pointer !important;
-            width: auto !important;
-            justify-content: center !important;
-            text-align: center !important;
-            transition: all 0.3s ease !important;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
-        }
-        .sidebar .tab-btn:hover, .sidebar .tab-btn.active {
-            background: var(--primary, #007bff) !important;
-            color: #ffffff !important;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3) !important;
-        }
-        .menu-toggle, .menu-overlay {
-            display: none !important;
-        }
-        header {
-            justify-content: space-between !important;
-            padding: 1rem 2vw !important;
-        }
-        @media (max-width: 850px) {
-            header {
-                justify-content: center !important;
-            }
-            .identity-section {
-                width: 100%;
-                justify-content: center;
-                margin-top: 10px;
-            }
-        }
-        .auth-hidden {
-            display: none !important;
-        }
-        
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(3px);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .modal-overlay.visible {
-            display: flex;
-            opacity: 1;
-        }
-        .modal-card {
-            background: var(--card-bg, #ffffff);
-            border-radius: 16px;
-            padding: 2rem;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-            text-align: center;
-        }
-        .modal-overlay.visible .modal-card {
-            transform: translateY(0);
-        }
-        :root {
-            --bg-color: #f4f7f6;
-            --text-color: #333;
-            --card-bg: #ffffff;
-            --border-color: #e2e8f0;
-        }
-        body.dark-mode {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --card-bg: #1e1e1e;
-            --border-color: #333;
-            --primary: #3b82f6;
-        }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .card, .dialogue-item, .modal-card, .sidebar .tab-btn {
-            background-color: var(--card-bg) !important;
-            color: var(--text-color) !important;
-            border-color: var(--border-color);
-        }
-        .undo-toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--card-bg);
-            color: var(--text-color);
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 2px solid var(--primary);
-            z-index: 3000;
-            display: flex;
-            align-items: center;
-            transition: opacity 0.5s ease;
-        }
-    </style>
+    <title>Carrom Kinetic Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-    <header>
-        <button class="menu-toggle" aria-label="Open Menu" style="display: none;">
-            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 12h18M3 6h18M3 18h18" />
-            </svg>
-        </button>
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="innova_solutions_logo.jpeg" alt="Innova Logo" style="height: 48px; width: auto; border-radius: 8px;">
-            <h1 style="font-size: clamp(1.2rem, 4vw, 2rem); margin: 0;">Innova Carrom Tracker</h1>
+<body class="bg-[#111113] text-white min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="flex items-center justify-between px-8 py-6 border-b border-zinc-800/50 flex-wrap gap-4">
+        <div class="text-2xl font-black italic tracking-tighter text-blue-200 drop-shadow-md flex items-center gap-3">
+            CARROM<span class="text-white">KINETIC</span>
         </div>
-        <!-- Identity Section -->
-        <div class="identity-section" style="display: flex; align-items: center; gap: 10px;">
-            <button id="dark-mode-toggle" class="icon-btn" style="background:none; border:none; font-size:1.5rem; cursor:pointer;" title="Toggle Dark Mode">🌙</button>
-            <span id="user-greeting" style="display: none; font-weight: 600; margin-right: 10px; color: var(--primary); font-size: 0.9rem;"></span>
-            <button id="identify-btn" class="primary-btn" style="width: auto; padding: 0.5rem 1rem; margin-top: 0; font-size: 0.9rem;">👤 Identify Yourself</button>
+        <nav class="flex gap-4 md:gap-8 text-sm font-semibold text-zinc-400 overflow-x-auto pb-1">
+            <a href="#" class="tab-btn active whitespace-nowrap border-b-2 border-transparent [&.active]:text-white [&.active]:border-white pb-1" data-target="home-dashboard">DASHBOARD</a>
+            <a href="#" class="tab-btn whitespace-nowrap hover:text-white transition-colors pb-1 border-b-2 border-transparent [&.active]:text-white [&.active]:border-white auth-hidden auth-required" data-target="new-match">NEW MATCH</a>
+            <a href="#" class="tab-btn whitespace-nowrap hover:text-white transition-colors pb-1 border-b-2 border-transparent [&.active]:text-white [&.active]:border-white" data-target="leaderboard">LEADERBOARD</a>
+            <a href="#" class="tab-btn whitespace-nowrap hover:text-white transition-colors pb-1 border-b-2 border-transparent [&.active]:text-white [&.active]:border-white" data-target="player-profiles">PLAYERS</a>
+            <a href="#" class="tab-btn whitespace-nowrap hover:text-white transition-colors pb-1 border-b-2 border-transparent [&.active]:text-white [&.active]:border-white auth-hidden auth-required" data-target="admin-panel">ADMIN</a>
+        </nav>
+        <div class="flex gap-4 text-sm font-semibold items-center">
+            <button id="dark-mode-toggle" class="px-3 py-2 rounded-full border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-700 transition-colors text-zinc-300">☀️</button>
+            <span id="user-greeting" class="hidden text-blue-400 font-bold"></span>
+            <button id="identify-btn" class="px-5 py-2 rounded-full bg-blue-500 hover:bg-blue-400 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all whitespace-nowrap">
+                IDENTIFY YOURSELF
+            </button>
         </div>
     </header>
 
-    <!-- Identity Modal -->
-    <div id="identity-modal" class="modal-overlay">
-        <div class="modal-card">
-            <h2>Who are you?</h2>
-            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Identify yourself to start matches or join the queue.</p>
-            <div class="form-group">
-                <input type="text" id="identity-name" placeholder="Your Name (e.g., John Doe)" list="player-names" required style="text-align: center; font-size: 1.1rem; padding: 1rem;">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button id="identity-submit" class="primary-btn" style="margin-top: 0; flex: 2;">Enter</button>
-                <button id="identity-cancel" class="primary-btn" style="margin-top: 0; flex: 1; background: var(--text-muted); box-shadow: none;">Cancel</button>
+    <!-- Main Content -->
+    <main class="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full relative">
+        
+        <!-- Left Dialogue Ticker -->
+        <div class="fixed left-4 top-1/2 -translate-y-1/2 w-48 h-[60vh] overflow-hidden pointer-events-none z-0 hidden xl:block" style="mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);">
+            <div class="flex flex-col gap-6 animate-[scroll-vertical_30s_linear_infinite]" id="dialogue-scroll-content">
+                <!-- Populated by JS -->
             </div>
         </div>
-    </div>
 
-    <!-- Left Dialogue Ticker -->
-    <div class="left-dialogue-ticker">
-        <div class="dialogue-scroll-content" id="dialogue-scroll-content">
-            <!-- Populated by JS -->
-        </div>
-    </div>
-
-    <!-- Right Banner -->
-    <div class="right-banner">
-        <h3>The winners of Innova carrom Tournament - 2025</h3>
-        <img src="2025_Carrom_tour_winner.jpg" alt="2025 Carrom Tournament Winners">
-
-        <!-- Live Room Status Card Moved Here -->
-        <div class="card" style="border: 2px solid var(--primary, #007bff); margin-top: 1.5rem; text-align: left; padding: 1rem;">
-            <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">🚪 Live Room Status</h2>
-            <div class="room-status-toggle" style="flex-direction: column; align-items: stretch; gap: 10px; padding: 1rem;">
-                <span id="room-status-text" class="status-text available" style="text-align: center;">🟢 Room is Available</span>
-                <label class="switch" style="margin: 0 auto;">
-                    <input type="checkbox" id="room-status-checkbox" disabled>
-                    <span class="slider round"></span>
-                </label>
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">
-                    <span>🟢 Available</span>
-                    <span>🔴 Occupied</span>
-                </div>
-            </div>
+        <section id="home-dashboard" class="view-section active grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
             
-            <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">🙋 Looking for a match?</h3>
-            <div class="form-group auth-hidden auth-required" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
-                <input type="text" id="lfg-name" placeholder="Your Name" style="margin-bottom: 0; width: 100%;" readonly>
-                <button id="lfg-add-btn" class="primary-btn" style="margin-top: 0; width: 100%; padding: 0.7rem;">Join Queue</button>
-            </div>
-            <ul id="lfg-list" style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem;">
-                <li style="color: var(--text-muted); text-align: center;">Loading queue...</li>
-            </ul>
-        </div>
-    </div>
-
-    <main>
-        <!-- Overlay -->
-        <div class="menu-overlay"></div>
-
-        <!-- Sidebar Navigation -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2>Menu</h2>
-                <button class="close-menu">✕</button>
-            </div>
-            <button class="tab-btn active" data-target="home-dashboard">🏠 Home Dashboard</button>
-            <button class="tab-btn auth-hidden auth-required" data-target="new-match">✏️ New Match</button>
-            <button class="tab-btn" data-target="leaderboard">🏆 Leaderboard</button>
-            <button class="tab-btn" data-target="player-profiles">👤 Player Profiles</button>
-            <button class="tab-btn auth-hidden auth-required" data-target="admin-panel">⚙️ Admin</button>
-        </nav>
-
-        <!-- Home Dashboard Section -->
-        <section id="home-dashboard" class="view-section active">
-            <div class="card winner-card">
-                <h2>🏆 Top Singles Player</h2>
-                <div class="champ-info">
-                    <span id="home-singles-name" class="champ-name">No Data</span>
-                    <span id="home-singles-wins" class="champ-wins">0 Wins</span>
+            <!-- CARD 1: Player Profile -->
+            <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex gap-2" id="home-singles-avatar-container">
+                            <div class="w-8 h-8 rounded-full bg-yellow-500 text-black flex items-center justify-center font-bold">★</div>
+                        </div>
+                        <span class="px-3 py-1 text-xs font-bold text-yellow-500 border border-yellow-600/50 rounded-full">🏆 TOP SINGLES PLAYER</span>
+                    </div>
+                    <h2 id="home-singles-name" class="text-3xl font-bold leading-tight mb-2">No Data</h2>
+                    <div class="flex items-center text-sm text-zinc-400 mb-6">
+                        <span class="w-2 h-2 rounded-full bg-blue-400 mr-2"></span> Top Ranked
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                        <div class="bg-[#202024] rounded-xl p-4 border border-zinc-800/50">
+                            <div class="text-xs text-zinc-500 font-semibold mb-1">TOTAL WINS</div>
+                            <div class="text-2xl font-bold text-green-400" id="home-singles-wins">0 Wins</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card winner-card">
-                <h2>🥇 Top Doubles Team</h2>
-                <div class="champ-info">
-                    <span id="home-doubles-name" class="champ-name">No Data</span>
-                    <span id="home-doubles-wins" class="champ-wins">0 Wins</span>
+            <!-- CARD 2: Team Profile -->
+            <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex -space-x-2" id="home-doubles-avatar-container">
+                            <div class="w-8 h-8 rounded-sm bg-zinc-800 flex items-center justify-center border border-zinc-700 text-blue-300">🛡️</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-3 py-1 text-xs font-bold text-zinc-300 border border-zinc-700 rounded-full">🥇 TOP DOUBLES TEAM</span>
+                        </div>
+                    </div>
+                    <h2 id="home-doubles-name" class="text-3xl font-bold leading-tight mb-1">No Data</h2>
+                    <div class="text-sm text-zinc-500 mb-8">Kinetic Duad</div>
+                    
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="bg-[#202024] rounded-xl p-4 border border-zinc-800/50">
+                            <div class="text-xs text-zinc-500 font-semibold mb-1">TOTAL WINS</div>
+                            <div class="text-3xl font-bold text-blue-400" id="home-doubles-wins">0 Wins</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Shared Scratchpad Card -->
-            <div class="card" style="margin-top: 1rem;">
-                <h2>📝 Shared Notes / Scratchpad</h2>
-                <textarea 
-                    id="shared-scratchpad" 
-                    maxlength="100000" 
-                    placeholder="Type notes here... (Autosaves automatically)"
-                    style="width: 100%; height: 200px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-family: inherit; resize: vertical; box-sizing: border-box; margin-top: 10px;">
-                </textarea>
+            <!-- CARD 3: Recent Matches (The Bulletin) -->
+            <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold italic tracking-tight">RECENT MATCHES</h3>
+                    <button class="w-8 h-8 rounded bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors">≡</button>
+                </div>
+                
+                <div class="flex-1 rounded-xl bg-[#202024] border border-zinc-800/50 p-4 overflow-y-auto">
+                    <ul id="recent-matches-list" class="space-y-3 text-sm">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
             </div>
 
-            <button class="primary-btn mt-2 auth-hidden auth-required"
-                onclick="document.querySelector('[data-target=\'new-match\']').click()">Start a Match</button>
+            <!-- CARD 4: Arena Floor -->
+            <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold">Arena Floor</h3>
+                        <span id="room-status-badge" class="px-3 py-1 text-xs font-bold rounded-full border flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span> <span id="room-status-text">LOADING</span>
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="bg-[#202024] border border-zinc-800/50 rounded-xl p-5 text-center">
+                            <h4 class="font-bold mb-4">Room Status Toggle</h4>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="room-status-checkbox" class="sr-only peer" disabled>
+                                <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
+                            </label>
+                            <div class="text-xs text-zinc-500 mt-3 font-semibold">Requires Identity to toggle</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD 5: Lobby Queue -->
+            <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold">Lobby Queue</h3>
+                        <span class="w-8 h-8 rounded bg-zinc-800 flex items-center justify-center text-zinc-400">👤+</span>
+                    </div>
+                    
+                    <ul id="lfg-list" class="space-y-3 mb-6 max-h-40 overflow-y-auto pr-2">
+                        <li class="text-center text-zinc-500 text-sm py-4">Loading queue...</li>
+                    </ul>
+                </div>
+                
+                <div class="mt-auto pt-4 border-t border-zinc-800/50 auth-hidden auth-required">
+                    <div class="flex gap-2">
+                        <input type="text" id="lfg-name" readonly class="flex-1 bg-[#202024] border border-zinc-700 rounded-xl px-4 text-sm focus:outline-none text-zinc-400 cursor-not-allowed">
+                        <button id="lfg-add-btn" class="px-4 py-3 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-bold text-sm transition-all shadow-[0_0_15px_rgba(59,130,246,0.3)] whitespace-nowrap">
+                            Join Queue
+                        </button>
+                    </div>
+                </div>
+                <button id="lfg-login-btn" class="w-full py-3.5 rounded-xl bg-zinc-800 text-zinc-400 font-bold text-sm cursor-not-allowed" onclick="document.getElementById('identify-btn').click()">
+                    LOGIN TO JOIN QUEUE
+                </button>
+            </div>
+
+            <!-- CARD 6: Collaborative Board -->
+            <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold">📝 Scratchpad</h3>
+                </div>
+                
+                <div class="flex-1 relative">
+                    <textarea 
+                        id="shared-scratchpad" 
+                        maxlength="100000" 
+                        placeholder="Type shared notes here... (Autosaves automatically)"
+                        class="w-full h-full min-h-[150px] bg-[#202024] border border-zinc-800 rounded-xl p-4 text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-zinc-600 resize-none text-zinc-300 italic"></textarea>
+                </div>
+                
+                <div class="text-[10px] font-bold text-zinc-500 flex items-center gap-1 mt-4">
+                    ↺ SYNCING LIVE
+                </div>
+            </div>
         </section>
 
-        <!-- New Match Section -->
+        <!-- SECTION 2: NEW MATCH -->
         <section id="new-match" class="view-section">
-            <div class="card">
-                <h2>Record a Match</h2>
-                <form id="match-form">
+            <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg max-w-2xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6">Record a Match</h2>
+                <form id="match-form" class="space-y-4">
                     <datalist id="player-names"></datalist>
-                    <div class="form-group">
-                        <label>Game Type</label>
-                        <select id="game-type" required>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-zinc-500 mb-1">Game Type</label>
+                        <select id="game-type" required class="w-full bg-[#202024] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
                             <option value="singles">Singles (1v1)</option>
                             <option value="doubles">Doubles (2v2)</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label>Match Date</label>
-                        <input type="date" id="match-date" required>
+                    <div>
+                        <label class="block text-xs font-bold text-zinc-500 mb-1">Match Date</label>
+                        <input type="date" id="match-date" required class="w-full bg-[#202024] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 [color-scheme:dark]">
                     </div>
 
-                    <!-- Match Format Toggle -->
-                    <div class="form-group">
-                        <label for="match-format">Format</label>
-                        <select id="match-format" required>
+                    <div>
+                        <label class="block text-xs font-bold text-zinc-500 mb-1">Format</label>
+                        <select id="match-format" required class="w-full bg-[#202024] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
                             <option value="knockout">Knockout (1 Game)</option>
                             <option value="bo3">Best of 3 Series</option>
                         </select>
                     </div>
 
-                    <!-- This will automatically display series score during BO3 -->
-                    <div id="bo3-scoreboard" style="font-weight: bold; margin-bottom: 1rem; color: var(--primary); text-align: center;"></div>
+                    <div id="bo3-scoreboard" class="font-bold text-center text-blue-400 my-2"></div>
 
-                    <div class="team-section">
-                        <h3>Team 1</h3>
-                        <input type="text" id="t1-player1" placeholder="Player 1 Name" list="player-names" required>
-                        <input type="text" id="t1-player2" placeholder="Player 2 Name" class="doubles-only" list="player-names">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Team 1 -->
+                        <div class="bg-[#202024] p-4 rounded-xl border border-zinc-700/50">
+                            <h3 class="font-bold mb-3">Team 1</h3>
+                            <input type="text" id="t1-player1" placeholder="Player 1 Name" list="player-names" required class="w-full bg-[#18181b] border border-zinc-700 rounded-lg p-2.5 text-sm mb-3 focus:outline-none focus:border-blue-500">
+                            <input type="text" id="t1-player2" placeholder="Player 2 Name" list="player-names" class="doubles-only w-full bg-[#18181b] border border-zinc-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <!-- Team 2 -->
+                        <div class="bg-[#202024] p-4 rounded-xl border border-zinc-700/50 relative mt-4 md:mt-0">
+                            <div class="absolute -left-6 top-1/2 -translate-y-1/2 w-6 text-center font-black italic text-zinc-500 hidden md:block">VS</div>
+                            <h3 class="font-bold mb-3">Team 2</h3>
+                            <input type="text" id="t2-player1" placeholder="Player 1 Name" list="player-names" required class="w-full bg-[#18181b] border border-zinc-700 rounded-lg p-2.5 text-sm mb-3 focus:outline-none focus:border-blue-500">
+                            <input type="text" id="t2-player2" placeholder="Player 2 Name" list="player-names" class="doubles-only w-full bg-[#18181b] border border-zinc-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-blue-500">
+                        </div>
                     </div>
 
-                    <div class="vs-badge">VS</div>
-
-                    <div class="team-section loser-team">
-                        <h3>Team 2</h3>
-                        <input type="text" id="t2-player1" placeholder="Player 1 Name" list="player-names" required>
-                        <input type="text" id="t2-player2" placeholder="Player 2 Name" class="doubles-only" list="player-names">
-                    </div>
-
-                    <!-- Board Details -->
-                    <div class="form-group" style="margin-top: 1rem;">
-                        <label for="board-winner">Who won the board?</label>
-                        <select id="board-winner" required>
+                    <div>
+                        <label class="block text-xs font-bold text-zinc-500 mb-1">Who won the board?</label>
+                        <select id="board-winner" required class="w-full bg-[#202024] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
                             <option value="t1">Team 1</option>
                             <option value="t2">Team 2</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="opponent-coins">Opponent's Remaining Coins</label>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="range" id="opponent-coins" min="0" max="9" value="0" style="flex: 1;" oninput="document.getElementById('coins-val').innerText = this.value">
-                            <span id="coins-val" style="font-weight: bold; font-size: 1.2rem;">0</span>
+                    <div>
+                        <label class="block text-xs font-bold text-zinc-500 mb-1">Opponent's Remaining Coins</label>
+                        <div class="flex items-center gap-4">
+                            <input type="range" id="opponent-coins" min="0" max="9" value="0" class="flex-1 accent-blue-500" oninput="document.getElementById('coins-val').innerText = this.value">
+                            <span id="coins-val" class="font-bold text-xl w-8 text-center">0</span>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="queen-cover">Queen Covered By</label>
-                        <select id="queen-cover" required>
+                    <div>
+                        <label class="block text-xs font-bold text-zinc-500 mb-1">Queen Covered By</label>
+                        <select id="queen-cover" required class="w-full bg-[#202024] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
                             <option value="none">None / By Loser</option>
                             <option value="t1">Team 1</option>
                             <option value="t2">Team 2</option>
                         </select>
                     </div>
 
-                    <button type="submit" class="primary-btn">Save Match</button>
+                    <button type="submit" class="w-full mt-4 py-3.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                        Save Match
+                    </button>
                 </form>
             </div>
         </section>
 
-        <!-- Leaderboard Section -->
+        <!-- SECTION 3: LEADERBOARD -->
         <section id="leaderboard" class="view-section">
-            <div class="card">
-                <h2>Top Players 🏅</h2>
-                <div class="stats-toggle">
-                    <button class="stat-btn active" data-stat="singles">Singles</button>
-                    <button class="stat-btn" data-stat="doubles">Doubles</button>
-                    <button class="stat-btn" data-stat="versus">Versus (H2H)</button>
+            <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-bold">Top Players 🏅</h2>
+                    <div class="flex bg-[#202024] rounded-lg p-1 border border-zinc-800 overflow-x-auto">
+                        <button class="stat-btn active px-4 py-1.5 text-sm font-bold rounded-md transition-colors" data-stat="singles">Singles</button>
+                        <button class="stat-btn px-4 py-1.5 text-sm font-bold rounded-md transition-colors" data-stat="doubles">Doubles</button>
+                        <button class="stat-btn px-4 py-1.5 text-sm font-bold rounded-md transition-colors whitespace-nowrap" data-stat="versus">Versus (H2H)</button>
+                    </div>
                 </div>
-
-                <div class="table-container">
-                    <table id="leaderboard-table">
-                        <thead>
-                            <tr id="table-header-row">
-                                <th>Rank</th>
-                                <th>Player/Team</th>
-                                <th>Wins</th>
-                                <th>Played</th>
-                                <th>Win %</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-body">
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card recent-matches">
-                <h2>Recent Matches</h2>
-                <ul id="recent-matches-list">
-                    <!-- Populated by JS -->
-                </ul>
-            </div>
-        </section>
-
-        <!-- Player Profiles Section -->
-        <section id="player-profiles" class="view-section">
-            <div class="card">
-                <h2>Player Profiles 👤</h2>
-                <div class="table-container">
-                    <table id="player-profiles-table">
-                        <thead>
-                            <tr>
-                                <th>Player</th>
-                                <th>Played (Total)</th>
-                                <th>Singles Played</th>
-                                <th>Doubles Played</th>
-                                <th>Won</th>
-                                <th>Lost</th>
-                                <th>Win %</th>
-                                <th>Form</th>
-                                <th>Streak</th>
-                                <th>High Score</th>
-                            </tr>
-                        </thead>
-                        <tbody id="player-profiles-body">
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- Admin Section -->
-        <section id="admin-panel" class="view-section">
-            <div class="card" id="admin-login-card">
-                <h2>Admin Login</h2>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="admin-password" placeholder="Enter admin password">
-                </div>
-                <button id="admin-login-btn" class="primary-btn">Login</button>
-                <p id="admin-error" style="color: var(--danger); display: none; margin-top: 1rem;">Incorrect password.</p>
-            </div>
-            <div class="card" id="admin-dashboard-card" style="display: none;">
-                <h2>Manage Data</h2>
                 
-                <!-- Admin Today Stats -->
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
-                    <div style="flex: 1; min-width: 250px; background: rgba(0, 90, 156, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(0, 90, 156, 0.2);">
-                        <h3 style="margin-top: 0; font-size: 1.1rem;">👤 Logged In Today</h3>
-                        <ul id="admin-today-logins" style="list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto;">
-                        </ul>
-                    </div>
-                    <div style="flex: 1; min-width: 250px; background: rgba(16, 185, 129, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.2);">
-                        <h3 style="margin-top: 0; font-size: 1.1rem;">🎮 Played Today</h3>
-                        <ul id="admin-today-players" style="list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto;">
-                        </ul>
-                    </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="leaderboard-table">
+                        <thead>
+                            <tr id="table-header-row" class="border-b border-zinc-800 text-xs text-zinc-500 uppercase tracking-wider">
+                                <th class="py-3 px-2 font-semibold">Rank</th>
+                                <th class="py-3 px-2 font-semibold">Player/Team</th>
+                                <th class="py-3 px-2 font-semibold">Wins</th>
+                                <th class="py-3 px-2 font-semibold">Played</th>
+                                <th class="py-3 px-2 font-semibold">Win %</th>
+                                <th class="py-3 px-2 font-semibold">Form</th>
+                                <th class="py-3 px-2 font-semibold">Streak</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body" class="text-sm divide-y divide-zinc-800/50">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
                 </div>
-
-                <!-- CSV Download -->
-                <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 2rem;">
-                    <h3 style="margin-top: 0; font-size: 1.1rem;">📥 Download Match History (CSV)</h3>
-                    <div class="form-group" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                        <div style="flex: 1; min-width: 150px;">
-                            <label>Start Date</label>
-                            <input type="date" id="csv-start-date">
-                        </div>
-                        <div style="flex: 1; min-width: 150px;">
-                            <label>End Date</label>
-                            <input type="date" id="csv-end-date">
-                        </div>
-                    </div>
-                    <button id="download-csv-btn" class="primary-btn" style="margin-top: 0; width: auto; padding: 0.8rem 1.5rem;">Download CSV</button>
-                </div>
-
-                <button id="reset-all-btn" class="primary-btn" style="background-color: var(--danger); margin-bottom: 2rem;">⚠️ Reset All Data</button>
-                <h3>Manage Specific Matches</h3>
-                <ul id="admin-matches-list" style="list-style: none; padding: 0; margin-top: 1rem;">
-                    <!-- Populated by JS -->
-                </ul>
-            </div>
-
-            <!-- Edit Match Card -->
-            <div class="card" id="admin-edit-card" style="display: none; margin-top: 1rem;">
-                <h2>Edit Match</h2>
-                <form id="edit-match-form">
-                    <input type="hidden" id="edit-match-id">
-                    <div class="form-group">
-                        <label>Winner(s)</label>
-                        <input type="text" id="edit-winner" required list="player-names">
-                    </div>
-                    <div class="form-group">
-                        <label>Loser(s)</label>
-                        <input type="text" id="edit-loser" required list="player-names">
-                    </div>
-                    <div class="form-group" style="display: flex; gap: 1rem;">
-                        <div style="flex: 1;">
-                            <label>Winner Score</label>
-                            <input type="number" id="edit-winner-score" required min="0">
-                        </div>
-                        <div style="flex: 1;">
-                            <label>Loser Score</label>
-                            <input type="number" id="edit-loser-score" required min="0">
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                        <button type="submit" class="primary-btn" style="flex: 1;">Update Match</button>
-                        <button type="button" class="primary-btn" id="cancel-edit-btn" style="flex: 1; background-color: var(--text-muted);">Cancel</button>
-                    </div>
-                </form>
             </div>
         </section>
+
+        <!-- SECTION 4: PLAYER PROFILES -->
+        <section id="player-profiles" class="view-section">
+            <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg">
+                <h2 class="text-2xl font-bold mb-6">Player Profiles 👤</h2>
+                <div class="overflow-x-auto">
+                    <table id="player-profiles-table" class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-zinc-800 text-xs text-zinc-500 uppercase tracking-wider">
+                                <th class="py-3 px-2 font-semibold">Player</th>
+                                <th class="py-3 px-2 font-semibold">Played</th>
+                                <th class="py-3 px-2 font-semibold">Singles</th>
+                                <th class="py-3 px-2 font-semibold">Doubles</th>
+                                <th class="py-3 px-2 font-semibold">Won</th>
+                                <th class="py-3 px-2 font-semibold">Lost</th>
+                                <th class="py-3 px-2 font-semibold">Win %</th>
+                                <th class="py-3 px-2 font-semibold">Form</th>
+                                <th class="py-3 px-2 font-semibold">Streak</th>
+                                <th class="py-3 px-2 font-semibold">High Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="player-profiles-body" class="text-sm divide-y divide-zinc-800/50">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: ADMIN PANEL -->
+        <section id="admin-panel" class="view-section">
+            <div class="max-w-4xl mx-auto space-y-6">
+                <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg max-w-md mx-auto" id="admin-login-card">
+                    <h2 class="text-2xl font-bold mb-4">Admin Login</h2>
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-zinc-500 mb-1">Password</label>
+                        <input type="password" id="admin-password" placeholder="Enter admin password" class="w-full bg-[#202024] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button id="admin-login-btn" class="w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-bold transition-colors">Login</button>
+                    <p id="admin-error" class="text-red-400 text-sm mt-3 hidden">Incorrect password.</p>
+                </div>
+
+                <div id="admin-dashboard-card" class="hidden space-y-6">
+                    <!-- Admin Today Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-blue-900/10 border border-blue-900/30 rounded-xl p-5">
+                            <h3 class="font-bold mb-3 flex items-center gap-2">👤 Logged In Today</h3>
+                            <ul id="admin-today-logins" class="space-y-2 text-sm max-h-48 overflow-y-auto pr-2"></ul>
+                        </div>
+                        <div class="bg-green-900/10 border border-green-900/30 rounded-xl p-5">
+                            <h3 class="font-bold mb-3 flex items-center gap-2">🎮 Played Today</h3>
+                            <ul id="admin-today-players" class="space-y-2 text-sm max-h-48 overflow-y-auto pr-2"></ul>
+                        </div>
+                    </div>
+
+                    <!-- CSV Download -->
+                    <div class="bg-[#202024] rounded-xl p-5 border border-zinc-800">
+                        <h3 class="font-bold mb-4">📥 Download Match History (CSV)</h3>
+                        <div class="flex flex-wrap gap-4 items-end">
+                            <div class="flex-1 min-w-[150px]">
+                                <label class="block text-xs font-bold text-zinc-500 mb-1">Start Date</label>
+                                <input type="date" id="csv-start-date" class="w-full bg-[#18181b] border border-zinc-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-blue-500 [color-scheme:dark]">
+                            </div>
+                            <div class="flex-1 min-w-[150px]">
+                                <label class="block text-xs font-bold text-zinc-500 mb-1">End Date</label>
+                                <input type="date" id="csv-end-date" class="w-full bg-[#18181b] border border-zinc-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-blue-500 [color-scheme:dark]">
+                            </div>
+                            <button id="download-csv-btn" class="px-6 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-400 text-white font-bold transition-colors h-[42px]">Download CSV</button>
+                        </div>
+                    </div>
+
+                    <button id="reset-all-btn" class="px-6 py-2.5 rounded-lg bg-red-500 hover:bg-red-400 text-white font-bold transition-colors">⚠️ Reset All Data</button>
+                    
+                    <div class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg">
+                        <h3 class="text-xl font-bold mb-4">Manage Specific Matches</h3>
+                        <ul id="admin-matches-list" class="space-y-3">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Edit Match Card -->
+                <div id="admin-edit-card" class="bg-[#18181b] rounded-2xl p-6 border border-zinc-800 shadow-lg hidden">
+                    <h2 class="text-xl font-bold mb-4">Edit Match</h2>
+                    <form id="edit-match-form" class="space-y-4">
+                        <input type="hidden" id="edit-match-id">
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-500 mb-1">Winner(s)</label>
+                            <input type="text" id="edit-winner" required list="player-names" class="w-full bg-[#202024] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-500 mb-1">Loser(s)</label>
+                            <input type="text" id="edit-loser" required list="player-names" class="w-full bg-[#202024] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-zinc-500 mb-1">Winner Score</label>
+                                <input type="number" id="edit-winner-score" required min="0" class="w-full bg-[#202024] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-zinc-500 mb-1">Loser Score</label>
+                                <input type="number" id="edit-loser-score" required min="0" class="w-full bg-[#202024] border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+                        <div class="flex gap-4 pt-2">
+                            <button type="submit" class="flex-1 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-400 text-white font-bold transition-colors">Update Match</button>
+                            <button type="button" id="cancel-edit-btn" class="flex-1 py-2.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white font-bold transition-colors">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <script type="module" src="app.js?v=5"></script>
-</body>
+    <!-- Footer -->
+    <footer class="px-8 py-6 flex flex-col md:flex-row items-center justify-between text-xs text-zinc-500 font-semibold border-t border-zinc-800/50 mt-auto">
+        <p>© 2024 KINETIC PORTFOLIO. ALL RIGHTS RESERVED.</p>
+        <div class="flex gap-6 mt-4 md:mt-0">
+            <a href="#" class="hover:text-zinc-300 transition-colors">SUPPORT</a>
+            <a href="#" class="hover:text-zinc-300 transition-colors">RULES</a>
+            <a href="#" class="hover:text-zinc-300 transition-colors">TOURNAMENT TERMS</a>
+            <a href="#" class="hover:text-zinc-300 transition-colors">CONTACT</a>
+        </div>
+    </footer>
 
+    <!-- Identity Modal -->
+    <div id="identity-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center transition-opacity opacity-0 [&.visible]:flex [&.visible]:opacity-100">
+        <div class="modal-card bg-[#18181b]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-8 w-[90%] max-w-md shadow-2xl transform translate-y-4 transition-transform [&.visible_.modal-card]:translate-y-0">
+            <h2 class="text-2xl font-bold mb-2">Who are you?</h2>
+            <p class="text-zinc-400 text-sm mb-6">Identify yourself to start matches or join the queue.</p>
+            <div class="mb-6">
+                <input type="text" id="identity-name" placeholder="Your Name (e.g., John Doe)" list="player-names" required class="w-full bg-[#202024] border border-zinc-700 rounded-xl p-4 text-center text-lg focus:outline-none focus:border-blue-500 shadow-inner">
+            </div>
+            <div class="flex gap-3">
+                <button id="identity-submit" class="flex-[2] py-3 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-bold transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)]">Enter</button>
+                <button id="identity-cancel" class="flex-1 py-3 rounded-xl bg-zinc-700 hover:bg-zinc-600 text-white font-bold transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js?v=6"></script>
+</body>
 </html>

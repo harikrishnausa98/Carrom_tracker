@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+body { font-family: 'Inter', sans-serif; }
+
+/* View Section Logic */
+.view-section { display: none; }
+#home-dashboard.active { display: grid; }
+#new-match.active, #leaderboard.active, #player-profiles.active, #admin-panel.active { display: block; }
+
+/* Auth Logic */
+.auth-hidden { display: none !important; }
+
+/* Light Mode Filter Hack */
+body.light-mode { filter: invert(1) hue-rotate(180deg); background-color: #eee; }
+body.light-mode img { filter: invert(1) hue-rotate(180deg); }
+
+/* Toast */
+.undo-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #202024;
+    color: #fff;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid #3b82f6;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.5s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Toggle active tabs */
+.tab-btn.active { color: white; border-bottom-color: white; }
+.stat-btn.active { background-color: #3b82f6; color: white; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+/* Left Dialogue Ticker Animation */
+@keyframes scroll-vertical {
+    0% { transform: translateY(100%); }
+    100% { transform: translateY(-100%); }
+}
+.dialogue-item {
+    background: rgba(32, 32, 36, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.8rem;
+    border-left: 3px solid #3b82f6;
+    color: #a1a1aa;
+}
